@@ -1,0 +1,251 @@
+// A web server configuration and request handler
+// Demonstrates dictionaries, exception handling, and complex control flow
+
+// Server configuration
+dict serverConfig = {"host": "localhost", "port": 8080, "debug": true}
+
+dict routes = {"/": "home", "/about": "about", "/api/users": "getUsers"}
+
+dict httpCodes = {"ok": 200, "badRequest": 400, "notFound": 404, "serverError": 500}
+
+// Request class to represent HTTP requests
+class Request {
+    var funk init(str method, str path) {
+        this.method = method
+        this.path = path
+        this.headers = {}
+        this.body = ""
+        return this
+    }
+    
+    var funk setHeader(str key, str value) {
+        this.headers[key] = value
+    }
+    
+    var funk setBody(str content) {
+        this.body = content
+    }
+    
+    bool funk isGet() {
+        return this.method == "GET"
+    }
+    
+    bool funk isPost() {
+        return this.method == "POST"
+    }
+}
+
+// Response class to build HTTP responses
+class Response {
+    var funk init(int code) {
+        this.statusCode = code
+        this.headers = {}
+        this.body = ""
+        return this
+    }
+    
+    var funk setStatus(int code) {
+        this.statusCode = code
+    }
+    
+    var funk addHeader(str key, str value) {
+        this.headers[key] = value
+    }
+    
+    var funk setBody(str content) {
+        this.body = content
+    }
+    
+    var funk json(dict data) {
+        this.addHeader("Content-Type", "application/json")
+        this.body = data
+    }
+    
+    var funk html(str content) {
+        this.addHeader("Content-Type", "text/html")
+        this.body = content
+    }
+}
+
+// Logger utility class
+class Logger {
+    var funk init(bool enabled, str prefix) {
+        this.enabled = enabled
+        this.prefix = prefix
+        return this
+    }
+    
+    var funk log(str message) {
+        if (this.enabled) {
+            print(this.prefix + message)
+        }
+    }
+    
+    var funk error(str message) {
+        if (this.enabled) {
+            print(this.prefix + "ERROR: " + message)
+        }
+    }
+}
+
+// Initialize logger
+var logger = new Logger(true, "[Server] ")
+
+// Route handler functions
+var funk handleHome(req) {
+    var res = new Response(200)
+    res.html("<h1>Welcome to the Home Page</h1>")
+    logger.log("Served home page")
+    return res
+}
+
+var funk handleAbout(req) {
+    var res = new Response(200)
+    res.html("<h1>About Us</h1><p>We build great software.</p>")
+    logger.log("Served about page")
+    return res
+}
+
+var funk handleNotFound(req) {
+    var res = new Response(404)
+    res.html("<h1>404 - Page Not Found</h1>")
+    logger.error("Page not found: " + req.path)
+    return res
+}
+
+// Main router function with exception handling
+var funk handleRequest(req) {
+    var res = new Response(500)
+    
+    try {
+        logger.log("Handling " + req.method + " " + req.path)
+        
+        if (req.path == "/") {
+            res = handleHome(req)
+        } else if (req.path == "/about") {
+            res = handleAbout(req)
+        } else {
+            res = handleNotFound(req)
+        }
+        
+    } catch (e) {
+        logger.error("Exception while handling request")
+        res.setStatus(500)
+        res.html("<h1>500 - Internal Server Error</h1>")
+    } finally {
+        res.addHeader("Server", "MyWebServer/1.0")
+        res.addHeader("X-Powered-By", "CustomScript")
+    }
+    
+    return res
+}
+
+// Middleware function
+var funk applyMiddleware(req) {
+    req.setHeader("X-Request-ID", "12345")
+    req.setHeader("X-Timestamp", "2024-01-15")
+    return req
+}
+
+// Simulate processing multiple requests
+var funk runServer() {
+    list requestPaths = ["/", "/about", "/contact", "/api/users"]
+    list methods = ["GET", "POST", "GET", "GET"]
+    
+    int totalRequests = 0
+    int successCount = 0
+    int errorCount = 0
+    
+    for i from 0 to 4 {
+        str currentPath = requestPaths[i]
+        str currentMethod = methods[i]
+        
+        var req = new Request(currentMethod, currentPath)
+        req = applyMiddleware(req)
+        
+        var res = handleRequest(req)
+        totalRequests = totalRequests + 1
+        
+        if (res.statusCode < 400) {
+            successCount = successCount + 1
+        } else {
+            errorCount = errorCount + 1
+        }
+        
+        logger.log("Request completed with status: " + res.statusCode)
+    }
+    
+    logger.log("Server statistics:")
+    logger.log("Total requests: " + totalRequests)
+    logger.log("Successful: " + successCount)
+    logger.log("Errors: " + errorCount)
+}
+
+// Validation tests
+bool funk validateConfig() {
+    demand serverConfig != null
+    demand routes != null
+    
+    bool isValid = true
+    
+    if (serverConfig["port"] < 1) {
+        isValid = false
+    }
+    
+    if (serverConfig["port"] > 65535) {
+        isValid = false
+    }
+    
+    return isValid
+}
+
+// Connection pool simulation
+class ConnectionPool {
+    var funk init(int max) {
+        this.maxSize = max
+        this.currentSize = 0
+        this.connections = []
+        return this
+    }
+    
+    int funk acquire() {
+        if (this.currentSize < this.maxSize) {
+            int connId = this.currentSize
+            this.currentSize = this.currentSize + 1
+            return connId
+        }
+        return -1
+    }
+    
+    var funk release(int connId) {
+        if (connId >= 0) {
+            this.currentSize = this.currentSize - 1
+        }
+    }
+    
+    int funk getAvailable() {
+        return this.maxSize - this.currentSize
+    }
+}
+
+// Main execution
+bool configValid = validateConfig()
+
+if (configValid) {
+    logger.log("Configuration validated successfully")
+    
+    var pool = new ConnectionPool(100)
+    
+    int conn1 = pool.acquire()
+    int conn2 = pool.acquire()
+    
+    logger.log("Acquired connections")
+    logger.log("Available connections: " + pool.getAvailable())
+    
+    runServer()
+    
+    pool.release(conn1)
+    pool.release(conn2)
+} else {
+    logger.error("Invalid configuration, server not started")
+}

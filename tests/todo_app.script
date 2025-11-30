@@ -1,0 +1,121 @@
+// A todo list application
+// Demonstrates classes, lists, dictionaries, and iteration
+
+class Task {
+    var funk init(str title, str priority) {
+        this.title = title
+        this.priority = priority
+        this.completed = false
+        return this
+    }
+
+    var funk complete() {
+        this.completed = true
+        print("Completed:", this.title)
+    }
+
+    str funk getStatus() {
+        if (this.completed) {
+            return "done"
+        }
+        return "pending"
+    }
+
+    var funk display() {
+        print("Task:", this.title)
+        print("  Priority:", this.priority)
+        print("  Status:", this.getStatus())
+    }
+}
+
+class TodoList {
+    var funk init(str name) {
+        this.name = name
+        this.tasks = []
+        this.taskCount = 0
+        return this
+    }
+
+    var funk addTask(task) {
+        this.tasks = this.tasks + [task]
+        this.taskCount = this.taskCount + 1
+        print("Added task:", task.title)
+    }
+
+    var funk showAll() {
+        print("=== " + this.name + " ===")
+        print("Total tasks:", this.taskCount)
+        for task in this.tasks {
+            task.display()
+        }
+    }
+
+    int funk countPending() {
+        int count = 0
+        for task in this.tasks {
+            if (task.completed == false) {
+                count = count + 1
+            }
+        }
+        return count
+    }
+
+    int funk countCompleted() {
+        int count = 0
+        for task in this.tasks {
+            if (task.completed) {
+                count = count + 1
+            }
+        }
+        return count
+    }
+
+    var funk showStats() {
+        print("Statistics for", this.name)
+        print("  Total:", this.taskCount)
+        print("  Pending:", this.countPending())
+        print("  Completed:", this.countCompleted())
+    }
+}
+
+var workList = new TodoList("Work Tasks")
+var task1 = new Task("Review pull requests", "high")
+var task2 = new Task("Update documentation", "medium")
+var task3 = new Task("Fix login bug", "high")
+var task4 = new Task("Write unit tests", "medium")
+var task5 = new Task("Refactor database module", "low")
+
+
+workList.addTask(task1)
+workList.addTask(task2)
+workList.addTask(task3)
+workList.addTask(task4)
+workList.addTask(task5)
+
+workList.showAll()
+print("Completing tasks...")
+task1.complete()
+task3.complete()
+
+
+workList.showStats()
+
+
+var personalList = new TodoList("Personal Tasks")
+
+var grocery = new Task("Buy groceries", "high")
+var exercise = new Task("Go to gym", "medium")
+var reading = new Task("Read book chapter", "low")
+
+personalList.addTask(grocery)
+personalList.addTask(exercise)
+personalList.addTask(reading)
+
+grocery.complete()
+
+personalList.showAll()
+personalList.showStats()
+
+print("=== Daily Summary ===")
+print("Work tasks pending:", workList.countPending())
+print("Personal tasks pending:", personalList.countPending())

@@ -1,0 +1,99 @@
+// A simple calculator application
+// Demonstrates functions, variables, and control flow
+
+int funk add(int a, int b) {
+    return a + b
+}
+
+int funk subtract(int a, int b) {
+    return a - b
+}
+
+int funk multiply(int a, int b) {
+    return a * b
+}
+
+int funk divide(int a, int b) {
+    demand b != 0
+    return a / b
+}
+
+int funk power(int base, int exp) {
+    int result = 1
+    for i from 0 to exp {
+        result = result * base
+    }
+    return result
+}
+
+int funk factorial(int n) {
+    demand n >= 0
+    if (n == 0) {
+        return 1
+    }
+    int result = 1
+    for i from 1 to n {
+        result = result * i
+    }
+    return result
+}
+
+int funk abs(int x) {
+    if x < 0 then -x
+    return x
+}
+
+int funk max(int a, int b) {
+    if (a > b) {
+        return a
+    }
+    return b
+}
+
+int funk min(int a, int b) {
+    if (a < b) {
+        return a
+    }
+    return b
+}
+
+// Main calculations
+int x = 10
+int y = 5
+
+print("Basic operations:")
+print("x =", x)
+print("y =", y)
+
+int sum = add(x, y)
+print("x + y =", sum)
+
+int diff = subtract(x, y)
+print("x - y =", diff)
+
+int prod = multiply(x, y)
+print("x * y =", prod)
+
+int quot = divide(x, y)
+print("x / y =", quot)
+
+print("Advanced operations:")
+int squared = power(x, 2)
+print("x^2 =", squared)
+
+int cubed = power(y, 3)
+print("y^3 =", cubed)
+
+int fact5 = factorial(5)
+print("5! =", fact5)
+
+print("Comparisons:")
+int bigger = max(x, y)
+print("max(x, y) =", bigger)
+
+int smaller = min(x, y)
+print("min(x, y) =", smaller)
+
+// Complex expression
+int result = add(multiply(x, 2), divide(y, 5))
+print("x*2 + y/5 =", result)
